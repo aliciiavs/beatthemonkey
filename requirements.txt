@@ -2,6 +2,6 @@ pyodbc
 pandas
 yfinance
 sqlalchemy
-dash==2.18.20
-plotly.graph_objects
-matplotlib.pyplot
+dash==2.18.2
+plotly
+matplotlib
