@@ -17,4 +17,4 @@ Make sure you have the following installed:
 
 **Clone the repository**:
    ```bash
-   git clone https://github.com/aliciiavs/BeatTheMonkey.git
+   [git clone https://github.com/aliciiavs/BeatTheMonkey.git](https://github.com/aliciiavs/beatthemonkey.git)
