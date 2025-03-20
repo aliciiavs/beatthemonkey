@@ -1,0 +1,7 @@
+pyodbc
+pandas
+yfinance
+sqlalchemy
+dash==2.18.20
+plotly.graph_objects
+matplotlib.pyplot
