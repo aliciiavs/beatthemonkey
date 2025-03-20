@@ -1,6 +1,5 @@
 import pyodbc
 import pandas as pd
-import random
 from datetime import datetime, timedelta
 import yfinance as yf
 from sqlalchemy import create_engine
