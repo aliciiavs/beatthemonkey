@@ -76,5 +76,42 @@ def generate_preset_results():
 
     connection.close()
 
-# Run this function every night to refresh the data
-generate_preset_results()
+# Function to fetch preset table (already created) and return data correctly
+def fetch_preset_table(stock, initial_amount, monthly_investment, strategy, years, preset_id):
+    # Create the database connection
+    connection = create_connection()
+    if connection is None:
+        # If connection fails, return empty lists
+        return [], [], []
+    
+    cursor = connection.cursor()
+    
+    # Prepare the SQL query.
+    # This assumes that your table 'Preset_Results' stores the results for each preset.
+    # Adjust the column names if needed.
+    query = """
+        SELECT Date, Total_Earned, Total_Invested 
+        FROM Preset_Results 
+        WHERE Preset_ID = ? 
+        ORDER BY Date ASC
+    """
+    try:
+        cursor.execute(query, preset_id)
+        rows = cursor.fetchall()
+        
+        # If no rows are returned, return empty lists
+        if not rows:
+            return [], [], []
+        
+        # Extract columns into lists
+        dates = [row[0] for row in rows]
+        portfolio_value = [row[1] for row in rows]  # Assuming Total_Earned is your portfolio value
+        total_invested = [row[2] for row in rows]
+        
+        return dates, portfolio_value, total_invested
+
+    except Exception as e:
+        print("Error fetching preset data:", e)
+        return [], [], []
+    finally:
+        connection.close()

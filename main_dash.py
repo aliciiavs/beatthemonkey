@@ -3,6 +3,7 @@ import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output, State, callback_context
 import dash  # Needed for callback_context
 import simulate_investment  # Import your simulation function
+import connect
 
 # Initialize the app
 app = Dash(__name__)
@@ -76,11 +77,6 @@ app.layout = html.Div([
                    'width': '70px', 'background-color': 'lightgray'}
         ),
         html.Button(
-            'Customize!', id='preset-4', n_clicks=0,
-            style={'display': 'block', 'margin': 'auto', 'height': '25px',
-                   'width': '70px', 'background-color': 'lightgray'}
-        ),
-        html.Button(
             'Reset', id='reset-btn', n_clicks=0,
             style={'display': 'block', 'margin': 'auto', 'height': '25px',
                    'width': '70px', 'background-color': 'lightcoral'}
@@ -121,20 +117,39 @@ app.layout = html.Div([
     prevent_initial_call=True
 )
 def update_graph(n_clicks, profile, asset, initial, monthly, years):
+    # Ensure all fields are provided
     if not all([profile, asset, initial, monthly, years]):
         return "Please fill all fields.", go.Figure()
 
     container = f"Profile: {profile}, Asset: {asset}"
     print(f"Profile: {profile}, Asset: {asset}, Initial: {initial}, Monthly: {monthly}, Years: {years}")
+
+    # Define the preset combinations (adjust as needed)
+    preset_combinations = [
+        ('random', '^GSPC', 1000, 200, 10),  # Preset 1
+        ('losing', '^IXIC', 5000, 300, 5),    # Preset 2
+        ('first', 'GC=F', 10000, 500, 20)      # Preset 3
+    ]
+
     try:
-        portfolio_dates, portfolio_values, total_invested = simulate_investment.simulate_investment(
-            asset, initial, monthly, profile, years
-        )
+        # If the inputs match one of the preset combinations, run the alternative simulation function
+        if (profile, asset, initial, monthly, years) in preset_combinations:
+            preset_id = preset_combinations.index((profile, asset, initial, monthly, years))
+            portfolio_dates, portfolio_values, total_invested = connect.fetch_preset_tables(
+                asset, initial, monthly, profile, years, preset_id
+            )
+        else:
+            # Otherwise, run the regular simulation function
+            portfolio_dates, portfolio_values, total_invested = simulate_investment.simulate_investment(
+                asset, initial, monthly, profile, years
+            )
+
         fig = go.Figure([
             go.Scatter(x=portfolio_dates, y=portfolio_values, mode='lines', name='Portfolio Value'),
             go.Scatter(x=portfolio_dates, y=total_invested, mode='lines', name='Total Invested')
         ])
         return container, fig
+
     except Exception as e:
         print(f"Error in simulation: {e}")
         return f"Error fetching data: {str(e)}", go.Figure()
@@ -143,23 +158,21 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years):
 # Combined callback for preset and reset functionality
 @app.callback(
     [
-        # Preset button styles
+        # Preset button styles (3 outputs)
         Output('preset-1', 'style'),
         Output('preset-2', 'style'),
         Output('preset-3', 'style'),
-        Output('preset-4', 'style'),
-        # Preset button n_clicks (reset to 0 when one is active or reset is pressed)
+        # Preset button n_clicks (3 outputs)
         Output('preset-1', 'n_clicks'),
         Output('preset-2', 'n_clicks'),
         Output('preset-3', 'n_clicks'),
-        Output('preset-4', 'n_clicks'),
-        # Input field values
+        # Input field values (5 outputs)
         Output('slct_profile', 'value'),
         Output('slct_asset', 'value'),
         Output('my_initial_inv', 'value'),
         Output('my_monthly_inv', 'value'),
         Output('my_year_count', 'value'),
-        # Input field styles
+        # Input field styles (5 outputs)
         Output('slct_profile', 'style'),
         Output('slct_asset', 'style'),
         Output('my_initial_inv', 'style'),
@@ -170,44 +183,42 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years):
         Input('preset-1', 'n_clicks'),
         Input('preset-2', 'n_clicks'),
         Input('preset-3', 'n_clicks'),
-        Input('preset-4', 'n_clicks'),
         Input('reset-btn', 'n_clicks')
     ]
 )
-def update_preset_and_reset(p1, p2, p3, p4, reset):
-    # Default styles
+def update_preset_and_reset(p1, p2, p3, reset):
+    # Default styles for input fields and preset buttons
     default_style_input = {'width': '175px', 'font-size': '14px', 'background-color': 'white'}
     default_preset_style = {'display': 'block', 'margin': 'auto', 'height': '25px', 'width': '70px', 'background-color': 'lightgray'}
-    
     # Active styles for presets
     active_style_1 = {'display': 'block', 'margin': 'auto', 'height': '25px', 'width': '70px', 'background-color': 'lightblue'}
     active_style_2 = {'display': 'block', 'margin': 'auto', 'height': '25px', 'width': '70px', 'background-color': 'lightgreen'}
     active_style_3 = {'display': 'block', 'margin': 'auto', 'height': '25px', 'width': '70px', 'background-color': 'lightyellow'}
-    active_style_4 = {'display': 'block', 'margin': 'auto', 'height': '25px', 'width': '70px', 'background-color': 'lightcoral'}
-
+    
     # Default input values
     default_values = ('random', '^GSPC', 1000, 200, 10)
-
+    
     ctx = callback_context
     if not ctx.triggered:
         trigger = None
     else:
         trigger = ctx.triggered[0]['prop_id'].split('.')[0]
     
-    # If reset button is clicked, return default preset styles, reset n_clicks, and default input values and styles.
+    # If reset button is clicked, return default values and styles
     if trigger == 'reset-btn' and reset > 0:
         return (
-            default_preset_style, default_preset_style, default_preset_style, default_preset_style,
-            0, 0, 0, 0,
-            *default_values,
-            default_style_input, default_style_input, default_style_input, default_style_input, default_style_input
+            default_preset_style, default_preset_style, default_preset_style,  # Preset button styles
+            0, 0, 0,                                                          # Preset n_clicks
+            *default_values,                                                   # Input field values
+            default_style_input, default_style_input, default_style_input, 
+            default_style_input, default_style_input                           # Input field styles
         )
-    # Otherwise, check which preset button triggered
+    # If Preset 1 is clicked and active (odd clicks)
     elif trigger == 'preset-1' and p1 % 2 == 1:
         return (
-            active_style_1, default_preset_style, default_preset_style, default_preset_style,
-            0, 0, 0, 0,
-            'random', '^GSPC', 1000, 200, 10,
+            active_style_1, default_preset_style, default_preset_style,  # Preset button styles
+            0, 0, 0,                                                    # Preset n_clicks
+            'random', '^GSPC', 1000, 200, 10,                            # Input values for Preset 1
             {**default_style_input, 'background-color': 'lightblue'},
             {**default_style_input, 'background-color': 'lightblue'},
             {**default_style_input, 'background-color': 'lightblue'},
@@ -216,8 +227,8 @@ def update_preset_and_reset(p1, p2, p3, p4, reset):
         )
     elif trigger == 'preset-2' and p2 % 2 == 1:
         return (
-            default_preset_style, active_style_2, default_preset_style, default_preset_style,
-            0, 0, 0, 0,
+            default_preset_style, active_style_2, default_preset_style,
+            0, 0, 0,
             'losing', '^IXIC', 5000, 300, 5,
             {**default_style_input, 'background-color': 'lightgreen'},
             {**default_style_input, 'background-color': 'lightgreen'},
@@ -227,8 +238,8 @@ def update_preset_and_reset(p1, p2, p3, p4, reset):
         )
     elif trigger == 'preset-3' and p3 % 2 == 1:
         return (
-            default_preset_style, default_preset_style, active_style_3, default_preset_style,
-            0, 0, 0, 0,
+            default_preset_style, default_preset_style, active_style_3,
+            0, 0, 0,
             'first', 'GC=F', 10000, 500, 20,
             {**default_style_input, 'background-color': 'lightyellow'},
             {**default_style_input, 'background-color': 'lightyellow'},
@@ -236,22 +247,11 @@ def update_preset_and_reset(p1, p2, p3, p4, reset):
             {**default_style_input, 'background-color': 'lightyellow'},
             {**default_style_input, 'background-color': 'lightyellow'}
         )
-    elif trigger == 'preset-4' and p4 % 2 == 1:
-        return (
-            default_preset_style, default_preset_style, default_preset_style, active_style_4,
-            0, 0, 0, 0,
-            'first', '^GSPC', 2000, 400, 15,
-            {**default_style_input, 'background-color': 'lightcoral'},
-            {**default_style_input, 'background-color': 'lightcoral'},
-            {**default_style_input, 'background-color': 'lightcoral'},
-            {**default_style_input, 'background-color': 'lightcoral'},
-            {**default_style_input, 'background-color': 'lightcoral'}
-        )
     else:
-        # If no preset is active, return default preset styles and default input values/styles
+        # If no preset is active, return default preset styles and input defaults
         return (
-            default_preset_style, default_preset_style, default_preset_style, default_preset_style,
-            0, 0, 0, 0,
+            default_preset_style, default_preset_style, default_preset_style,
+            0, 0, 0,
             *default_values,
             default_style_input, default_style_input, default_style_input, default_style_input, default_style_input
         )
