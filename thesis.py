@@ -10,8 +10,10 @@ strategy = "losing"
 initial_amount = 200
 monthly_investment = 200
 years=10
-preset_id=0
+preset_id=1
 
 # Simulate the investment
-a,b,c=connect.fetch_preset_table(stock, initial_amount, monthly_investment, strategy, years)
+a,b,c=connect.fetch_preset_table(preset_id)
 print(a)
+print(b)
+print(c)

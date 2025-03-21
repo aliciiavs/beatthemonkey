@@ -77,7 +77,7 @@ def generate_preset_results():
     connection.close()
 
 # Function to fetch preset table (already created) and return data correctly
-def fetch_preset_table(stock, initial_amount, monthly_investment, strategy, years, preset_id):
+def fetch_preset_table(preset_id):
     # Create the database connection
     connection = create_connection()
     if connection is None:

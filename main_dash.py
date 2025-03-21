@@ -134,10 +134,8 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years):
     try:
         # If the inputs match one of the preset combinations, run the alternative simulation function
         if (profile, asset, initial, monthly, years) in preset_combinations:
-            preset_id = preset_combinations.index((profile, asset, initial, monthly, years))
-            portfolio_dates, portfolio_values, total_invested = connect.fetch_preset_tables(
-                asset, initial, monthly, profile, years, preset_id
-            )
+            preset_id = preset_combinations.index((profile, asset, initial, monthly, years)) + 1
+            portfolio_dates, portfolio_values, total_invested = connect.fetch_preset_table(preset_id)
         else:
             # Otherwise, run the regular simulation function
             portfolio_dates, portfolio_values, total_invested = simulate_investment.simulate_investment(
