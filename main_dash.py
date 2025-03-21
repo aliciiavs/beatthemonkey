@@ -48,7 +48,7 @@ app.layout = html.Div([
             html.Div([
                 html.Label('Monthly Investment', style={'width': '150px', 'display': 'inline-block'}),
                 dcc.Input(id='my_monthly_inv', type='number', placeholder="Monthly Investment",
-                          value=200, style={'width': '175px', 'font-size': '14px'})
+                          value=250, style={'width': '175px', 'font-size': '14px'})
             ], style={'display': 'flex', 'align-items': 'center', 'margin-bottom': '10px'}),
             html.Div([
                 html.Label('Years to Invest', style={'width': '150px', 'display': 'inline-block'}),
@@ -194,7 +194,7 @@ def update_preset_and_reset(p1, p2, p3, reset):
     active_style_3 = {'display': 'block', 'margin': 'auto', 'height': '25px', 'width': '70px', 'background-color': 'lightyellow'}
     
     # Default input values
-    default_values = ('random', '^GSPC', 1000, 200, 10)
+    default_values = ('random', '^GSPC', 1000, 250, 10)
     
     ctx = callback_context
     if not ctx.triggered:
@@ -216,7 +216,7 @@ def update_preset_and_reset(p1, p2, p3, reset):
         return (
             active_style_1, default_preset_style, default_preset_style,  # Preset button styles
             0, 0, 0,                                                    # Preset n_clicks
-            'random', '^GSPC', 1000, 200, 10,                            # Input values for Preset 1
+            'random', '^GSPC', 1000, 250, 10,                            # Input values for Preset 1
             {**default_style_input, 'background-color': 'lightblue'},
             {**default_style_input, 'background-color': 'lightblue'},
             {**default_style_input, 'background-color': 'lightblue'},
