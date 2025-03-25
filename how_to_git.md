@@ -20,3 +20,9 @@ git push -u origin master
 ```bash
 git pull
 ```
+
+If the current working directory wants to be updatedd to the one in GitHUb (pull no changes saved):
+```bash
+git fetch --all
+git reset --hard origin/master
+```
