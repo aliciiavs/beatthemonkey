@@ -1,7 +1,6 @@
 import yfinance as yf
 import pandas as pd
 import random
-from sqlalchemy import create_engine
 
 def simulate_investment(stock, initial_amount, monthly_investment, strategy, years, preset_id=None):
     # Ensure the index is datetime
