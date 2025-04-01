@@ -1,6 +1,7 @@
 import yfinance as yf
 import simulate_investment
 import connect
+import inflation
 
 # List of stocks and strategies
 stock = "^GSPC"
@@ -12,8 +13,10 @@ monthly_investment = 200
 years=10
 preset_id=1
 
-# Simulate the investment
-a,b,c=connect.fetch_preset_table(preset_id)
-print(a)
-print(b)
-print(c)
+portfolio_dates, portfolio_values, total_invested = simulate_investment.simulate_investment(
+                stock, initial_amount, monthly_investment, strategy, years
+            )
+
+inflated_total = inflation.calculate_value(portfolio_dates, total_invested)
+
+print(inflated_total)

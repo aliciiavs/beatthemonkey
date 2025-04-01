@@ -4,6 +4,7 @@ from dash import Dash, dcc, html, Input, Output, State, callback_context
 import dash  # Needed for callback_context
 import simulate_investment  # Import your simulation function
 #import connect
+import inflation
 
 # Initialize the app
 app = Dash(__name__)
@@ -186,6 +187,7 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years):
             portfolio_dates, portfolio_values, total_invested = simulate_investment.simulate_investment(
                 asset, initial, monthly, profile, years
             )
+            inflated_total = inflation.calculate_value(portfolio_dates, total_invested)
             generated = portfolio_values[-1] - total_invested[-1]
             if generated > 0:
                 container = f"If you had invested {years} ago, today you would have earned {round(generated):,} $ !!!"
@@ -194,7 +196,8 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years):
 
         fig = go.Figure([
             go.Scatter(x=portfolio_dates, y=portfolio_values, mode='lines', name='Portfolio Value'),
-            go.Scatter(x=portfolio_dates, y=total_invested, mode='lines', name='Total Invested')
+            go.Scatter(x=portfolio_dates, y=total_invested, mode='lines', name='Total Invested'),
+            go.Scatter(x=portfolio_dates, y=inflated_total, mode='lines', name='Overall Total Valued')
         ])
         return container, fig
 
