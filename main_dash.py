@@ -187,17 +187,18 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years):
             portfolio_dates, portfolio_values, total_invested = simulate_investment.simulate_investment(
                 asset, initial, monthly, profile, years
             )
-            inflated_total = inflation.calculate_value(portfolio_dates, total_invested)
+            portfolio_df = inflation.calculate_value(portfolio_dates, initial, monthly)
+            adjusted_values = portfolio_df['Adjusted Value']
             generated = portfolio_values[-1] - total_invested[-1]
             if generated > 0:
-                container = f"If you had invested {years} ago, today you would have earned {round(generated):,} $ !!!"
+                container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} $ !!!"
             elif generated < 0:
-                container = f"If you had invested {years} ago, you would have lost {round(generated):,} $ ..."
+                container = f"If you had invested {years} years ago, you would have lost {round(generated):,} $ ..."
 
         fig = go.Figure([
             go.Scatter(x=portfolio_dates, y=portfolio_values, mode='lines', name='Portfolio Value'),
             go.Scatter(x=portfolio_dates, y=total_invested, mode='lines', name='Total Invested'),
-            go.Scatter(x=portfolio_dates, y=inflated_total, mode='lines', name='Overall Total Valued')
+            go.Scatter(x=portfolio_dates, y=adjusted_values, mode='lines', name='Adjusted Total Investment')
         ])
         return container, fig
 

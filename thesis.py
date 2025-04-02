@@ -1,6 +1,6 @@
 import yfinance as yf
 import simulate_investment
-import connect
+#import connect
 import inflation
 
 # List of stocks and strategies
@@ -8,7 +8,7 @@ stock = "^GSPC"
 strategy = "losing"
 
 # Simulate the investment for each stock and strategy
-initial_amount = 200
+initial_amount = 201
 monthly_investment = 200
 years=10
 preset_id=1
