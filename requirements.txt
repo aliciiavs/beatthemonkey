@@ -5,3 +5,4 @@ sqlalchemy
 dash==2.18.2
 plotly
 matplotlib
+dash-bootstrap-components==1.4.1

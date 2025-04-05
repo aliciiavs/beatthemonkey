@@ -86,5 +86,19 @@ def simulate_investment(stock, initial_amount, monthly_investment, strategy, yea
 
             portfolio_values.at[date, 'Portfolio Value'] = shares * float(data.loc[date])
             portfolio_values.at[date, 'Total Invested'] = total_investment
+    
+    elif strategy == "buythedip":
+        recent_peak = float(first_price)  # first_price is already computed from data
+        for date in data.index:
+            current_price = float(data.loc[date])  # Get scalar value from the Series
+            
+            # Check if the current price has dropped by 5% or more from the recent peak
+            if current_price < recent_peak * 0.95:
+                shares += monthly_investment / current_price  # Invest at the current price
+                total_investment += monthly_investment         # Increase total investment
+                recent_peak = current_price                     # Reset the peak to current price
+            
+            portfolio_values.at[date, 'Portfolio Value'] = shares * current_price
+            portfolio_values.at[date, 'Total Invested'] = total_investment
 
     return portfolio_values.index, portfolio_values['Portfolio Value'], portfolio_values['Total Invested']

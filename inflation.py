@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
+
 
 def calculate_value(portfolio_dates, initial_investment, monthly_investment):
     """
@@ -19,8 +21,16 @@ def calculate_value(portfolio_dates, initial_investment, monthly_investment):
     Returns:
       pd.DataFrame: A DataFrame with Date, Total Invested, and Adjusted Value.
     """
+    # Get the current working directory where the script is running
+    current_directory = os.getcwd()
+
+    # Automatically construct the full path to the file
+    file_path = os.path.join(current_directory, "BeatTheMonkey/data", "IPC_1961_to_2025.xlsx")
+
+    # Now, use the file path
+    data = pd.read_excel(file_path, sheet_name="IPC_change")
+
     # Load the inflation data
-    data = pd.read_excel("data/IPC_1961_to_2025.xlsx", sheet_name="IPC_change")
     data.columns = ['Año', 'Mes', 'Inflation_Rate']
     
     # If inflation rates are given as percentages, uncomment this line:

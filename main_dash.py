@@ -1,10 +1,10 @@
 import pandas as pd
 import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output, State, callback_context
-import dash  # Needed for callback_context
 import simulate_investment  # Import your simulation function
 #import connect
 import inflation
+import dash_bootstrap_components as dbc
 
 # Initialize the app
 app = Dash(__name__)
@@ -23,17 +23,35 @@ app.layout = html.Div([
         # Two sections side by side
         html.Div([
             html.Div([
-                html.Label('Select Profile', style={'margin-bottom': '5px', 'display': 'block'}),
+                html.Span("💡", id="popover-icon", style={"cursor": "pointer", "fontSize": "1.5em"}),
+                html.Span('Select Profile'),
+                dbc.Popover(
+                    [
+                        dbc.PopoverHeader("What does this mean?", style={'font-family': 'Arial, sans-serif', 'font-size':'15px', 'font-weight': 'bold'}),
+                        dbc.PopoverBody(id="popover-body", style={'font-family': 'Arial, sans-serif', 'font-size':'15px'})
+                    ],
+                    id="popover",
+                    target="popover-icon",
+                    trigger="click",
+                    style={
+                'marginLeft': '-319px',  # Adjust the horizontal margin
+                'marginTop': '30px',  # Adjust the vertical margin
+                'max-width': '250px'  # Optional: limit the width of the popover
+            }
+                ),
                 dcc.Dropdown(
                     options=[
                         {'label': 'Random', 'value': 'random'},
                         {'label': 'Losing', 'value': 'losing'},
+                        {'label': 'Buy-The-Dip', 'value': 'buythedip'},
                         {'label': 'First', 'value': 'first'}
                     ],
                     value='random',
                     id='slct_profile'
                 ),
+
                 html.Br(),
+
                 html.Label('Select Asset', style={'margin-bottom': '5px', 'display': 'block'}),
                 dcc.Dropdown(
                     options=[
@@ -125,10 +143,6 @@ app.layout = html.Div([
             'padding-top':'10px'
         }),
 
-        html.Img(src='/assets/arrow.png', style={'width': '150px', 'height': 'auto', 'position': 'absolute',
-        'top': '20px',   # Distance from the top
-        'right': '200px',}),
-
         # Submit Button
         html.Button('Submit', id='submit-btn', n_clicks=0,
                     style={
@@ -150,6 +164,20 @@ app.layout = html.Div([
     })
 ])
 
+@app.callback(
+    Output('popover-body', 'children'),
+    Input('slct_profile', 'value')
+)
+def update_popover_text(profile):
+    if profile == 'random':
+        return "This strategy involves investing randomly at irregular intervals."
+    elif profile == 'losing':
+        return "This strategy invests when a price is consistently falling."
+    elif profile == 'buythedip':
+        return "This strategy invests when the price drops significantly (buying the dip)."
+    elif profile == 'first':
+        return "This strategy invests on the first trading day of each month."
+    return "Select a strategy to learn more."
 
 # Callback for updating graph
 @app.callback(
