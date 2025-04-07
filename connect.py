@@ -1,7 +1,5 @@
 import pyodbc
-import pandas as pd
-from datetime import datetime, timedelta
-import yfinance as yf
+from datetime import datetime
 from simulate_investment import simulate_investment
 
 # Define your connection details here

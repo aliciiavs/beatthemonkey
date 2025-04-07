@@ -69,7 +69,10 @@ app.layout = html.Div([
                 html.Div([
                     html.Label('Initial Investment', style={'width': '150px', 'display': 'inline-block'}),
                     dcc.Input(id='my_initial_inv', type='number', placeholder="Initial Investment",
-                            value=1000, style={
+                            value=1000,
+                            min=0,
+                            max=999999999,
+                            style={
                                 'width': '175px', 'font-size': '14px', 'padding': '8px', 'border-radius': '5px',
                                 'border': '1px solid #ccc'
                             })
@@ -77,7 +80,10 @@ app.layout = html.Div([
                 html.Div([
                     html.Label('Monthly Investment', style={'width': '150px', 'display': 'inline-block'}),
                     dcc.Input(id='my_monthly_inv', type='number', placeholder="Monthly Investment",
-                            value=250, style={
+                            value=250,
+                            min=0,
+                            max=999999999,
+                            style={
                                 'width': '175px', 'font-size': '14px', 'padding': '8px', 'border-radius': '5px',
                                 'border': '1px solid #ccc'
                             })
@@ -85,7 +91,10 @@ app.layout = html.Div([
                 html.Div([
                     html.Label('Years to Invest', style={'width': '150px', 'display': 'inline-block'}),
                     dcc.Input(id='my_year_count', type='number', placeholder="Years to Invest",
-                            value=10, style={
+                            value=10,
+                            min=1,
+                            max=150,
+                            style={
                                 'width': '175px', 'font-size': '14px', 'padding': '8px', 'border-radius': '5px',
                                 'border': '1px solid #ccc'
                             })
@@ -170,7 +179,7 @@ app.layout = html.Div([
 )
 def update_popover_text(profile):
     if profile == 'random':
-        return "This strategy involves investing randomly at irregular intervals."
+        return "Dollar-Cost Averaging (DCA): This strategy involves investing randomly at irregular intervals."
     elif profile == 'losing':
         return "This strategy invests when a price is consistently falling."
     elif profile == 'buythedip':
@@ -212,7 +221,7 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years):
             #portfolio_dates, portfolio_values, total_invested = connect.fetch_preset_table(preset_id)
         else:
             # Otherwise, run the regular simulation function
-            portfolio_dates, portfolio_values, total_invested = simulate_investment.simulate_investment(
+            portfolio_dates, portfolio_values, total_invested = simulate_investment.simulate_investment2(
                 asset, initial, monthly, profile, years
             )
             portfolio_df = inflation.calculate_value(portfolio_dates, initial, monthly)
