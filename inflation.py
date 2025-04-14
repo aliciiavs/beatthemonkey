@@ -25,7 +25,7 @@ def calculate_value(portfolio_dates, initial_investment, monthly_investment):
     current_directory = os.getcwd()
 
     # Automatically construct the full path to the file
-    file_path = os.path.join(current_directory, "BeatTheMonkey/data", "IPC_1961_to_2025.xlsx")
+    file_path = os.path.join(current_directory, "data", "IPC_1961_to_2025.xlsx")
 
     # Now, use the file path
     data = pd.read_excel(file_path, sheet_name="IPC_change")
@@ -68,7 +68,6 @@ def calculate_value(portfolio_dates, initial_investment, monthly_investment):
             infl_row = data[(data['Año'] == current_date.year) & (data['Mes'] == current_date.month)]
             rate = infl_row['Inflation_Rate'].iloc[0] if not infl_row.empty else 0
             rate = rate/100
-            print(rate)
             # Apply the formula: New Value = (Previous Value * (1 - rate)) + monthly_investment
             new_value = current_value * (1 - rate) + monthly_investment
         else:

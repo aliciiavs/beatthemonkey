@@ -41,12 +41,11 @@ app.layout = html.Div([
                 ),
                 dcc.Dropdown(
                     options=[
-                        {'label': 'Random', 'value': 'random'},
                         {'label': 'Losing', 'value': 'losing'},
                         {'label': 'Buy-The-Dip', 'value': 'buythedip'},
                         {'label': 'First', 'value': 'first'}
                     ],
-                    value='random',
+                    value='Losing',
                     id='slct_profile'
                 ),
 
@@ -178,9 +177,7 @@ app.layout = html.Div([
     Input('slct_profile', 'value')
 )
 def update_popover_text(profile):
-    if profile == 'random':
-        return "Dollar-Cost Averaging (DCA): This strategy involves investing randomly at irregular intervals."
-    elif profile == 'losing':
+    if profile == 'losing':
         return "This strategy invests when a price is consistently falling."
     elif profile == 'buythedip':
         return "This strategy invests when the price drops significantly (buying the dip)."
@@ -209,7 +206,7 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years):
 
     # Define the preset combinations (adjust as needed)
     preset_combinations = [
-        ('random', '^GSPC', 1000, 200, 10),  # Preset 1
+        ('buythedip', '^GSPC', 1000, 200, 10),  # Preset 1
         ('losing', '^IXIC', 5000, 300, 5),    # Preset 2
         ('first', 'GC=F', 10000, 500, 20)      # Preset 3
     ]
@@ -218,24 +215,30 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years):
         # If the inputs match one of the preset combinations, run the alternative simulation function
         if (profile, asset, initial, monthly, years) in preset_combinations:
             preset_id = preset_combinations.index((profile, asset, initial, monthly, years)) + 1
-            #portfolio_dates, portfolio_values, total_invested = connect.fetch_preset_table(preset_id)
+            #portfolio_dates, portfolio_values, total_invested, random_portfolio_values = connect.fetch_preset_table(preset_id)
         else:
             # Otherwise, run the regular simulation function
-            portfolio_dates, portfolio_values, total_invested = simulate_investment.simulate_investment2(
+            portfolio_dates, portfolio_values, total_invested, random_portfolio_values = simulate_investment.simulate_investment(
                 asset, initial, monthly, profile, years
             )
             portfolio_df = inflation.calculate_value(portfolio_dates, initial, monthly)
             adjusted_values = portfolio_df['Adjusted Value']
             generated = portfolio_values[-1] - total_invested[-1]
-            if generated > 0:
-                container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} $ !!!"
-            elif generated < 0:
-                container = f"If you had invested {years} years ago, you would have lost {round(generated):,} $ ..."
+            random_last = random_portfolio_values[-1] - total_invested[-1]
+            if generated > 0 and random_last > generated:
+                container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} $ !!! A MONKEY BEAT YOUU BY {round(random_last-generated):,}$"
+            elif generated < 0 and random_last > generated:
+                container = f"If you had invested {years} years ago, you would have lost {round(generated):,} $ ... A MONKEY BEAT YOUU BY {round(random_last-generated):,}$"
+            elif generated > 0 and random_last < generated:
+                container = f"If you had invested {years} years ago, you would have lost {round(generated):,} $ ... YOU BEAT THE MONKEYYY"
+            elif generated < 0 and random_last < generated:
+                            container = f"If you had invested {years} years ago, you would have lost {round(generated):,} $ ... YOU BEAT THE MONKEYYY"
 
         fig = go.Figure([
             go.Scatter(x=portfolio_dates, y=portfolio_values, mode='lines', name='Portfolio Value'),
             go.Scatter(x=portfolio_dates, y=total_invested, mode='lines', name='Total Invested'),
-            go.Scatter(x=portfolio_dates, y=adjusted_values, mode='lines', name='Adjusted Total Investment')
+            go.Scatter(x=portfolio_dates, y=adjusted_values, mode='lines', name='Adjusted Total Investment'),
+            go.Scatter(x=portfolio_dates, y=random_portfolio_values, mode='lines', name='Random Portfolio Value'),  
         ])
         return container, fig
 

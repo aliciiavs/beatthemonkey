@@ -10,6 +10,7 @@ CREATE TABLE dbo.Preset_Results (
     Preset_ID INT NOT NULL,
     Total_Invested FLOAT NOT NULL,
     Total_Earned FLOAT NOT NULL,
+    Random_Value FLOAT NOT NULL,
     FOREIGN KEY (Preset_ID) REFERENCES dbo.Presets(Preset_ID) ON DELETE CASCADE
 );
 GO

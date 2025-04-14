@@ -49,20 +49,20 @@ def generate_preset_results():
         end_date = today
 
         # Use your existing simulate_investment function
-        dates, portfolio_value, total_invested = simulate_investment(stock, initial, monthly, strategy, start_year)
+        dates, portfolio_value, total_invested, random_portfolio_value  = simulate_investment(stock, initial, monthly, strategy, start_year)
 
         # Print the results to ensure they are being returned correctly
-        print(f"Results for {stock} with strategy {strategy}: {dates}, {portfolio_value}, {total_invested}")
+        print(f"Results for {stock} with strategy {strategy}: {dates}, {portfolio_value}, {total_invested}, {random_portfolio_value}")
 
         # Step 4: Store the results in a list for bulk insertion
-        for date, value, invested in zip(dates, portfolio_value, total_invested):
-            new_results.append((date, preset_id, invested, value))
+        for date, value, invested, random in zip(dates, portfolio_value, total_invested, random_portfolio_value):
+            new_results.append((date, preset_id, invested, value, random))
 
     # Step 5: Insert the calculated data into the SQL table
     if new_results:
         try:
             cursor.executemany(
-                "INSERT INTO Preset_Results (Date, Preset_ID, Total_Invested, Total_Earned) VALUES (?, ?, ?, ?)",
+                "INSERT INTO Preset_Results (Date, Preset_ID, Total_Invested, Total_Earned, Random_Value) VALUES (?, ?, ?, ?, ?)",
                 new_results
             )
             print("New data inserted successfully.")
@@ -87,7 +87,7 @@ def fetch_preset_table(preset_id):
     # This assumes that your table 'Preset_Results' stores the results for each preset.
     # Adjust the column names if needed.
     query = """
-        SELECT Date, Total_Earned, Total_Invested 
+        SELECT Date, Total_Earned, Total_Invested, Random_Value 
         FROM Preset_Results 
         WHERE Preset_ID = ? 
         ORDER BY Date ASC
@@ -104,8 +104,9 @@ def fetch_preset_table(preset_id):
         dates = [row[0] for row in rows]
         portfolio_value = [row[1] for row in rows]  # Assuming Total_Earned is your portfolio value
         total_invested = [row[2] for row in rows]
+        random_portfolio_values = [row[3] for row in rows]
         
-        return dates, portfolio_value, total_invested
+        return dates, portfolio_value, total_invested, random_portfolio_values
 
     except Exception as e:
         print("Error fetching preset data:", e)

@@ -17,7 +17,7 @@ GO
 -- Step 3: Insert the given data
 INSERT INTO dbo.Presets (Strategy, Stock, Initial_Investment, Monthly_Investment, Start_Year)
 VALUES 
-    ('random', '^GSPC', 1000, 200, 10), 
+    ('buythedip', '^GSPC', 1000, 200, 10), 
     ('losing', '^IXIC', 5000, 300, 5),    
     ('first', 'GC=F', 10000, 500, 20);
 GO
