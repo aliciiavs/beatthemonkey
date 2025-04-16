@@ -47,6 +47,7 @@ app.layout = html.Div([
                         {'label': 'Momentum Snap-In', 'value': 'growing'},
                         {'label': '% Drop Buy-The-Dip', 'value': '0.98buythedip'},
                         {'label': 'Hybrid Buy-The-Dip', 'value': 'complexbuythedip'},
+                        {'label': 'Complex 5% Buy-The-Dip', 'value': 'complexbuythedip'},
                         {'label': 'Dollar-Cost Averaging', 'value': 'first'}
                     ],
                     value='losing',

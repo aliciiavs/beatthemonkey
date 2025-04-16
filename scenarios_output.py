@@ -20,7 +20,7 @@ result = df.groupby(["Scenario", "Asset", "Strategy"])["Success"].mean().reset_i
 result.rename(columns={"Success": "Proportion Final > Random"}, inplace=True)
 
 # Save the result to a new CSV
-result.to_csv("strategy_success_rates.csv", index=False)
+result.to_csv("no_name_strategy_success_rates.csv", index=False)
 
 # Print the result
 print(result)

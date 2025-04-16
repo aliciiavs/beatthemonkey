@@ -133,7 +133,7 @@ def simulate_investment(stock, initial_amount, monthly_investment, strategy, yea
         In order to fit the input idea, the strategy was adapted into an easier and more specified model.
         
         Hold a budget.
-        If the next day drop more than 10% then buy. Else, do not. Keep it in a count and then invest
+        If the next day drop more than 20% then buy. Else, do not. Keep it in a count and then invest
         when it is correct to do so. If the period ends and still leftover cash, invest all. 
         """
         previous_month = data.index[0].month

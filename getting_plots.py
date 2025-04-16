@@ -25,8 +25,7 @@ def get_heatmap():
         cmap="YlGnBu", 
         vmin=0, 
         vmax=1, 
-        linewidths=0.5,
-        annot_kws={"size": 8}  # smaller text inside boxes
+        linewidths=0.5
     )
 
     # Plot aesthetics
@@ -69,7 +68,7 @@ def get_barchart():
         x="Scenario",
         y="Success Rate",
         hue="Strategy",
-        palette="viridis",
+        palette="CMRmap",
         errorbar=None
     )
 
@@ -117,7 +116,6 @@ def get_scenario_avg_heatmap():
         vmin=0,
         vmax=1,
         linewidths=0.5,
-        palette="viridis",
         annot_kws={"size": 10}
     )
 
@@ -129,7 +127,6 @@ def get_scenario_avg_heatmap():
 
     # Show the heatmap
     plt.show()
-
 
 import pandas as pd
 import seaborn as sns
@@ -184,60 +181,187 @@ def plot_avg_earnings_per_scenario():
     plt.show()
 
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
+import seaborn as sns
 
-def plot_mean_final_value_per_asset():
+def plot_mean_final_value_per_strategy():
     # Load dataset
     df = pd.read_csv("investment_simulation_results.csv")
 
-    # Clean asset names
+    # Define strategies and their corresponding labels
+    strategies = [
+        "first",
+        "losing",
+        "growing",
+        "buythedip",
+        "0.98buythedip",
+        "complexbuythedip"
+    ]
+
+    strategy_labels = {
+        "first": "Dollar-Cost Averaging",
+        "losing": "Losing Streak",
+        "growing": "Momentum Snap-In",
+        "buythedip": "5% Buy-The-Dip",
+        "0.98buythedip": "Complex 2% Drop Buy-The-Dip",
+        "complexbuythedip": "Hybrid Buy-The-Dip",
+        "random": "Random Strategy"
+    }
+
+    # List to hold the combined data
+    combined_data = []
+
+    # Process each strategy
+    for strategy in strategies:
+        strat_avg = (
+            df[df["Strategy"] == strategy]
+            .groupby(["Scenario"])["Final Value"]
+            .mean()
+            .reset_index()
+            .rename(columns={"Final Value": "Average Final Value"})
+        )
+        strat_avg["Type"] = strategy
+        combined_data.append(strat_avg)
+
+    # Process the random strategy
+    rand_avg = (
+        df.groupby(["Scenario"])["Random Final"]
+        .mean()
+        .reset_index()
+        .rename(columns={"Random Final": "Average Final Value"})
+    )
+    rand_avg["Type"] = "random"
+    combined_data.append(rand_avg)
+
+    # Combine all data
+    combined = pd.concat(combined_data, ignore_index=True)
+
+    # Map strategy names to labels
+    combined["Type"] = combined["Type"].map(strategy_labels)
+
+    # Plot
+    plt.figure(figsize=(14, 8))
+    ax = sns.barplot(
+        data=combined,
+        x="Scenario",
+        y="Average Final Value",
+        hue="Type",
+        palette="Set2"
+    )
+
+    # Aesthetics
+    plt.title("Average Final Value per Strategy and Scenario", fontsize=14)
+    plt.ylabel("Average Final Portfolio Value", fontsize=12)
+    plt.xlabel("Scenario", fontsize=12)
+    plt.legend(title="Strategy", bbox_to_anchor=(1.05, 1), loc='upper left', fontsize='small')
+    plt.tight_layout()
+    plt.show()
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+def get_scenario_avg_heatmap_excluding():
+    # Load the data
+    df = pd.read_csv("strategy_success_rates.csv")
+
+    # Optional: Clean asset names
     df["Asset"] = df["Asset"].replace({
         "^GSPC": "S&P500",
         "^IXIC": "NASDAQ",
         "GC=F": "Gold"
     })
 
-    # --- STRATEGY average per Scenario and Asset ---
-    strat_avg = (
-        df.groupby(["Scenario", "Asset"])["Final Value"]
-        .mean()
-        .reset_index()
-        .rename(columns={"Final Value": "Average Final Value"})
+    # Exclude 'buythedip' and 'losing' strategies
+    df = df[~df["Strategy"].isin(["5% Buy-The-Dip", "Complex 2% Buy-The-Dip"])]
+
+    # Rename column for clarity
+    df.rename(columns={"Beats the Random in what %?": "Success Rate"}, inplace=True)
+
+    # Group by Scenario only and take mean success rate
+    scenario_avg = df.groupby("Scenario")["Success Rate"].mean().reset_index()
+
+    # Turn it into a format suitable for heatmap (1 row, multiple columns)
+    pivot = scenario_avg.pivot_table(index=None, columns="Scenario", values="Success Rate")
+
+    # Plot heatmap
+    plt.figure(figsize=(10, 1.5))  # Make it short since it’s a 1-row heatmap
+    sns.heatmap(
+        pivot,
+        annot=True,
+        fmt=".2f",
+        cmap="YlOrRd",
+        vmin=0,
+        vmax=1,
+        linewidths=0.5,
+        annot_kws={"size": 10}
     )
-    strat_avg["Type"] = "Strategy"
 
-    # --- RANDOM average per Scenario and Asset ---
-    rand_avg = (
-        df.groupby(["Scenario", "Asset"])["Random Final"]
-        .mean()
-        .reset_index()
-        .rename(columns={"Random Final": "Average Final Value"})
-    )
-    rand_avg["Type"] = "Random"
+    # Aesthetics
+    plt.title("Average Success Rate per Scenario (Excluding Zero Success Strategies)", fontsize=12)
+    plt.yticks([], [])  # Hide y-axis since it's just a single row
+    plt.xlabel("Scenario", fontsize=10)
+    plt.tight_layout()
 
-    # Combine both
-    combined = pd.concat([strat_avg, rand_avg], ignore_index=True)
+    # Show the heatmap
+    plt.show()
 
-    # Create a label to differentiate bars by both Type and Asset
-    combined["Label"] = combined["Asset"] + " (" + combined["Type"] + ")"
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+def plot_avg_earnings_per_scenario_excluding():
+    # Load the dataset
+    df = pd.read_csv("investment_simulation_results.csv")  # use your actual file name
+
+    # Rename asset codes for readability
+    df["Asset"] = df["Asset"].replace({
+        "^GSPC": "S&P500",
+        "^IXIC": "NASDAQ",
+        "GC=F": "Gold"
+    })
+
+    # Exclude 'buythedip' and 'losing' strategies
+    df = df[~df["Strategy"].isin(["buythedip", "0.98buythedip"])]
+
+    # Compute average final value (earnings) per scenario for strategy and random
+    strategy_avg = df.groupby("Scenario")["Final Value"].mean().reset_index()
+    random_avg = df.groupby("Scenario")["Random Final"].mean().reset_index()
+
+    # Rename columns to merge easily
+    strategy_avg.rename(columns={"Final Value": "Average Final Value"}, inplace=True)
+    random_avg.rename(columns={"Random Final": "Average Final Value"}, inplace=True)
+
+    # Add a column to distinguish them
+    strategy_avg["Type"] = "Strategy"
+    random_avg["Type"] = "Random"
+
+    # Combine into one DataFrame
+    combined = pd.concat([strategy_avg, random_avg])
 
     # Plot
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(10, 6))
     ax = sns.barplot(
         data=combined,
         x="Scenario",
         y="Average Final Value",
-        hue="Label",
-        palette="Set2"
+        hue="Type",
+        palette="viridis"
     )
+    for container in ax.containers:
+        ax.bar_label(container, fmt="%.2f", padding=3, fontsize=9)
 
     # Aesthetics
-    plt.title("Average Final Value per Asset and Scenario (Strategy vs Random)", fontsize=14)
+    plt.title("Average Earnings per Scenario: Strategy vs Random (Excluding Zero Success Strategies)", fontsize=14)
     plt.ylabel("Average Final Portfolio Value", fontsize=12)
     plt.xlabel("Scenario", fontsize=12)
-    plt.legend(title="Asset (Type)", bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.legend(title="Type", loc="best")
     plt.tight_layout()
+
+    # Show it
     plt.show()
 
-plot_mean_final_value_per_asset()
+get_scenario_avg_heatmap()
+get_scenario_avg_heatmap_excluding()
+plot_avg_earnings_per_scenario_excluding()
+plot_mean_final_value_per_strategy()
