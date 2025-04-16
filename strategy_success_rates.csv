@@ -1,0 +1,73 @@
+Scenario,Asset,Strategy,Beats the Random in what %?
+A,GOLD,% Drop Buy-The-Dip,0
+A,GOLD,Hybrid Buy-The-Dip,0
+A,GOLD,Complex 5% Buy-The-Dip,0.86
+A,GOLD,Dollar-Cost Averaging,0.39
+A,GOLD,Momentum Snap-In,0.88
+A,GOLD,Losing Streak,0.58
+A,S&P500,% Drop Buy-The-Dip,0
+A,S&P500,Hybrid Buy-The-Dip,0
+A,S&P500,Complex 5% Buy-The-Dip,0.97
+A,S&P500,Dollar-Cost Averaging,0.41
+A,S&P500,Momentum Snap-In,0.5
+A,S&P500,Losing Streak,0.99
+A,NASDAQ,% Drop Buy-The-Dip,0
+A,NASDAQ,Hybrid Buy-The-Dip,0
+A,NASDAQ,Complex 5% Buy-The-Dip,0.94
+A,NASDAQ,Dollar-Cost Averaging,0.44
+A,NASDAQ,Momentum Snap-In,0.46
+A,NASDAQ,Losing Streak,0.46
+B,GOLD,% Drop Buy-The-Dip,0
+B,GOLD,Hybrid Buy-The-Dip,0
+B,GOLD,Complex 5% Buy-The-Dip,0.86
+B,GOLD,Dollar-Cost Averaging,0.39
+B,GOLD,Momentum Snap-In,0.88
+B,GOLD,Losing Streak,0.58
+B,S&P500,% Drop Buy-The-Dip,0
+B,S&P500,Hybrid Buy-The-Dip,0
+B,S&P500,Complex 5% Buy-The-Dip,0.97
+B,S&P500,Dollar-Cost Averaging,0.41
+B,S&P500,Momentum Snap-In,0.5
+B,S&P500,Losing Streak,0.99
+B,NASDAQ,% Drop Buy-The-Dip,0
+B,NASDAQ,Hybrid Buy-The-Dip,0
+B,NASDAQ,Complex 5% Buy-The-Dip,0.94
+B,NASDAQ,Dollar-Cost Averaging,0.44
+B,NASDAQ,Momentum Snap-In,0.46
+B,NASDAQ,Losing Streak,0.46
+C,GOLD,% Drop Buy-The-Dip,0
+C,GOLD,Hybrid Buy-The-Dip,0
+C,GOLD,Complex 5% Buy-The-Dip,0.65
+C,GOLD,Dollar-Cost Averaging,0.51
+C,GOLD,Momentum Snap-In,0.7
+C,GOLD,Losing Streak,0.59
+C,S&P500,% Drop Buy-The-Dip,0
+C,S&P500,Hybrid Buy-The-Dip,0
+C,S&P500,Complex 5% Buy-The-Dip,0.52
+C,S&P500,Dollar-Cost Averaging,0.43
+C,S&P500,Momentum Snap-In,0.5
+C,S&P500,Losing Streak,0.49
+C,NASDAQ,% Drop Buy-The-Dip,0
+C,NASDAQ,Hybrid Buy-The-Dip,0
+C,NASDAQ,Complex 5% Buy-The-Dip,0.5
+C,NASDAQ,Dollar-Cost Averaging,0.41
+C,NASDAQ,Momentum Snap-In,0.46
+C,NASDAQ,Losing Streak,0.46
+D,GOLD,% Drop Buy-The-Dip,0
+D,GOLD,Hybrid Buy-The-Dip,0
+D,GOLD,Complex 5% Buy-The-Dip,0.65
+D,GOLD,Dollar-Cost Averaging,0.51
+D,GOLD,Momentum Snap-In,0.7
+D,GOLD,Losing Streak,0.59
+D,S&P500,% Drop Buy-The-Dip,0
+D,S&P500,Hybrid Buy-The-Dip,0
+D,S&P500,Complex 5% Buy-The-Dip,0.52
+D,S&P500,Dollar-Cost Averaging,0.43
+D,S&P500,Momentum Snap-In,0.5
+D,S&P500,Losing Streak,0.49
+D,NASDAQ,% Drop Buy-The-Dip,0
+D,NASDAQ,Hybrid Buy-The-Dip,0
+D,NASDAQ,Complex 5% Buy-The-Dip,0.5
+D,NASDAQ,Dollar-Cost Averaging,0.41
+D,NASDAQ,Momentum Snap-In,0.46
+D,NASDAQ,Losing Streak,0.46

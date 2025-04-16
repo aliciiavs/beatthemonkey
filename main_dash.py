@@ -5,6 +5,7 @@ import simulate_investment  # Import your simulation function
 #import connect
 import inflation
 import dash_bootstrap_components as dbc
+import random
 
 # Initialize the app
 app = Dash(__name__)
@@ -19,6 +20,7 @@ app.layout = html.Div([
             'font-size': '36px',
             'margin-top': '0px'
         }),
+        dcc.Store(id='current_seed', data=42),
 
         # Two sections side by side
         html.Div([
@@ -41,14 +43,16 @@ app.layout = html.Div([
                 ),
                 dcc.Dropdown(
                     options=[
-                        {'label': 'Losing', 'value': 'losing'},
-                        {'label': 'Buy-The-Dip', 'value': 'buythedip'},
-                        {'label': 'First', 'value': 'first'}
+                        {'label': 'Losing Strategy', 'value': 'losing'},
+                        {'label': 'Momentum Snap-In', 'value': 'growing'},
+                        {'label': '% Drop Buy-The-Dip', 'value': '0.98buythedip'},
+                        {'label': 'Hybrid Buy-The-Dip', 'value': 'complexbuythedip'},
+                        {'label': 'Dollar-Cost Averaging', 'value': 'first'}
                     ],
-                    value='Losing',
+                    value='losing',
                     id='slct_profile'
                 ),
-
+            
                 html.Br(),
 
                 html.Label('Select Asset', style={'margin-bottom': '5px', 'display': 'block'}),
@@ -150,6 +154,8 @@ app.layout = html.Div([
             'gap': '10px',
             'padding-top':'10px'
         }),
+        
+        html.Img(id='monkey-gif', src='assets/angry_monkey.gif', style={"display":"none", "width": "50%", "max-width": "200px", "margin-left":"1175px", "margin-top": "-500px"}),
 
         # Submit Button
         html.Button('Submit', id='submit-btn', n_clicks=0,
@@ -160,7 +166,20 @@ app.layout = html.Div([
                         'background-color': '#4CAF50', 'border': 'none', 'color': 'white',
                         'border-radius': '5px', 'font-size': '16px'
                     }),
-        html.Br(),
+
+        html.Span("🔁", id="popover-icon2", n_clicks=0, style={"cursor": "pointer",
+                                                   "fontSize": "1.5em",
+                                                   'position': 'absolute', 'top': '326px', 'left': '55%'}),
+                dbc.Popover(
+                    [
+                        dbc.PopoverHeader("New Random", style={'font-family': 'Arial, sans-serif', 'font-size':'15px'}),
+                    ],
+                    id="popover2",
+                    target="popover-icon2",
+                    trigger="hover",
+                    style={
+            }
+                ),
 
         # Output & Graph Section
         html.Div(id='output_container', children=[], style={'text-align': 'center', 'margin-top': '70px', 'font-size':'20px', 'color': 'green'}),
@@ -179,25 +198,41 @@ app.layout = html.Div([
 def update_popover_text(profile):
     if profile == 'losing':
         return "This strategy invests when a price is consistently falling."
-    elif profile == 'buythedip':
+    elif profile == '0.98buythedip':
+        return "This strategy invests when the price drops significantly (buying the dip)."
+    elif profile == 'complexbuythedip':
         return "This strategy invests when the price drops significantly (buying the dip)."
     elif profile == 'first':
         return "This strategy invests on the first trading day of each month."
     return "Select a strategy to learn more."
 
+# Update the random seed
+@app.callback(
+    Output("current_seed", "data"),
+    Input("popover-icon2", "n_clicks"),
+    prevent_initial_call=True
+)
+def update_seed(n_clicks):
+    new_seed = random.randint(0, 99999)
+    return new_seed
+
 # Callback for updating graph
 @app.callback(
     [Output('output_container', 'children'),
-     Output('line_chart', 'figure')],
+     Output('line_chart', 'figure'),
+     Output('monkey-gif', 'src'),
+     Output('monkey-gif', 'style')],
     [Input('submit-btn', 'n_clicks')],
     [State('slct_profile', 'value'),
      State('slct_asset', 'value'),
      State('my_initial_inv', 'value'),
      State('my_monthly_inv', 'value'),
-     State('my_year_count', 'value')],
+     State('my_year_count', 'value'),
+     State('current_seed', 'data')],
     prevent_initial_call=True
 )
-def update_graph(n_clicks, profile, asset, initial, monthly, years):
+
+def update_graph(n_clicks, profile, asset, initial, monthly, years, current_seed):
     # Ensure all fields are provided
     if not all([profile, asset, initial, monthly, years]):
         return "Please fill all fields.", go.Figure()
@@ -219,28 +254,39 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years):
         else:
             # Otherwise, run the regular simulation function
             portfolio_dates, portfolio_values, total_invested, random_portfolio_values = simulate_investment.simulate_investment(
-                asset, initial, monthly, profile, years
+                asset, initial, monthly, profile, years, current_seed
             )
             portfolio_df = inflation.calculate_value(portfolio_dates, initial, monthly)
             adjusted_values = portfolio_df['Adjusted Value']
             generated = portfolio_values[-1] - total_invested[-1]
             random_last = random_portfolio_values[-1] - total_invested[-1]
+            monkey_gif = ""
             if generated > 0 and random_last > generated:
-                container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} $ !!! A MONKEY BEAT YOUU BY {round(random_last-generated):,}$"
+                container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} $ !!! A MONKEY BEAT YOUU BY {round(random_last-generated):,}$ seed={current_seed}"
+                monkey_gif = "/assets/winning_monkey.gif"
             elif generated < 0 and random_last > generated:
-                container = f"If you had invested {years} years ago, you would have lost {round(generated):,} $ ... A MONKEY BEAT YOUU BY {round(random_last-generated):,}$"
+                container = f"If you had invested {years} years ago, you would have lost {round(-generated):,} $ ... A MONKEY BEAT YOUU BY {round(random_last-generated):,}$ seed={current_seed}"
+                monkey_gif = "/assets/winning_monkey.gif"
             elif generated > 0 and random_last < generated:
-                container = f"If you had invested {years} years ago, you would have lost {round(generated):,} $ ... YOU BEAT THE MONKEYYY"
+                container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} $ ... YOU BEAT THE MONKEYYY BY {round(generated-random_last):,}$ seed={current_seed}"
+                monkey_gif = "/assets/pretentious_monkey.gif"
             elif generated < 0 and random_last < generated:
-                            container = f"If you had invested {years} years ago, you would have lost {round(generated):,} $ ... YOU BEAT THE MONKEYYY"
-
+                container = f"If you had invested {years} years ago, you would have lost {round(-generated):,} $ ... YOU BEAT THE MONKEYYY BY {round(generated-random_last):,}$ seed={current_seed}"
+                monkey_gif = "/assets/pretentious_monkey.gif"
         fig = go.Figure([
             go.Scatter(x=portfolio_dates, y=portfolio_values, mode='lines', name='Portfolio Value'),
             go.Scatter(x=portfolio_dates, y=total_invested, mode='lines', name='Total Invested'),
             go.Scatter(x=portfolio_dates, y=adjusted_values, mode='lines', name='Adjusted Total Investment'),
             go.Scatter(x=portfolio_dates, y=random_portfolio_values, mode='lines', name='Random Portfolio Value'),  
         ])
-        return container, fig
+        return container, fig, monkey_gif, {
+    "display": "block",
+    "position": "absolute",
+    "top": "40px",
+    "left": "1150px",
+    "width": "250px",
+    "zIndex": "10"
+}
 
     except Exception as e:
         print(f"Error in simulation: {e}")
@@ -347,7 +393,7 @@ def update_preset_and_reset(p1, p2, p3, reset):
     }
    
     # Default input values
-    default_values = ('random', '^GSPC', 1000, 250, 10)
+    default_values = ('losing', '^GSPC', 1000, 250, 10)
     
     ctx = callback_context
     if not ctx.triggered:
@@ -369,7 +415,7 @@ def update_preset_and_reset(p1, p2, p3, reset):
         return (
             active_style_1, default_preset_style, default_preset_style,  # Preset button styles
             0, 0, 0,                                                    # Preset n_clicks
-            'random', '^GSPC', 1000, 250, 10,                            # Input values for Preset 1
+            '0.98buythedip', '^GSPC', 1000, 250, 10,                            # Input values for Preset 1
             {**default_style_input, 'background-color': 'lightblue'},
             {**default_style_input, 'background-color': 'lightblue'},
             {**default_style_input, 'background-color': 'lightblue'},
