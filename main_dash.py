@@ -2,10 +2,13 @@ import pandas as pd
 import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output, State, callback_context
 import simulate_investment  # Import your simulation function
-#import connect
+import connect
 import inflation
 import dash_bootstrap_components as dbc
 import random
+import warnings
+warnings.filterwarnings("ignore")
+
 
 # Initialize the app
 app = Dash(__name__)
@@ -242,8 +245,8 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years, current_seed
 
     # Define the preset combinations (adjust as needed)
     preset_combinations = [
-        ('buythedip', '^GSPC', 1000, 200, 10),  # Preset 1
-        ('losing', '^IXIC', 5000, 300, 5),    # Preset 2
+        ('growing', '^GSPC', 1000, 200, 3),    # Preset 1
+        ('losing', '^IXIC', 5000, 300, 10),    # Preset 2
         ('first', 'GC=F', 10000, 500, 20)      # Preset 3
     ]
 
@@ -251,29 +254,36 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years, current_seed
         # If the inputs match one of the preset combinations, run the alternative simulation function
         if (profile, asset, initial, monthly, years) in preset_combinations:
             preset_id = preset_combinations.index((profile, asset, initial, monthly, years)) + 1
-            #portfolio_dates, portfolio_values, total_invested, random_portfolio_values = connect.fetch_preset_table(preset_id)
+            portfolio_dates, portfolio_values, total_invested, random_portfolio_values = connect.fetch_preset_table(preset_id)
+            current_seed = 1
         else:
             # Otherwise, run the regular simulation function
             portfolio_dates, portfolio_values, total_invested, random_portfolio_values = simulate_investment.simulate_investment(
                 asset, initial, monthly, profile, years, current_seed
             )
-            portfolio_df = inflation.calculate_value(portfolio_dates, initial, monthly)
-            adjusted_values = portfolio_df['Adjusted Value']
-            generated = portfolio_values[-1] - total_invested[-1]
-            random_last = random_portfolio_values[-1] - total_invested[-1]
-            monkey_gif = ""
-            if generated > 0 and random_last > generated:
-                container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} $ !!! A MONKEY BEAT YOUU BY {round(random_last-generated):,}$ seed={current_seed}"
-                monkey_gif = "/assets/winning_monkey.gif"
-            elif generated < 0 and random_last > generated:
-                container = f"If you had invested {years} years ago, you would have lost {round(-generated):,} $ ... A MONKEY BEAT YOUU BY {round(random_last-generated):,}$ seed={current_seed}"
-                monkey_gif = "/assets/winning_monkey.gif"
-            elif generated > 0 and random_last < generated:
-                container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} $ ... YOU BEAT THE MONKEYYY BY {round(generated-random_last):,}$ seed={current_seed}"
-                monkey_gif = "/assets/pretentious_monkey.gif"
-            elif generated < 0 and random_last < generated:
-                container = f"If you had invested {years} years ago, you would have lost {round(-generated):,} $ ... YOU BEAT THE MONKEYYY BY {round(generated-random_last):,}$ seed={current_seed}"
-                monkey_gif = "/assets/pretentious_monkey.gif"
+
+        # Fixing bug: Can only use .dt accessor with datetimelike values
+        portfolio_dates = pd.to_datetime(portfolio_dates, errors='coerce')
+        if portfolio_dates.dtype != 'datetime64[ns]':
+            raise ValueError("portfolio_dates is not in datetime format.")
+
+        portfolio_df = inflation.calculate_value(portfolio_dates, initial, monthly)
+        adjusted_values = portfolio_df['Adjusted Value']
+        generated = portfolio_values[-1] - total_invested[-1]
+        random_last = random_portfolio_values[-1] - total_invested[-1]
+        monkey_gif = ""
+        if generated > 0 and random_last > generated:
+            container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} $ !!! A MONKEY BEAT YOUU BY {round(random_last-generated):,}$ seed={current_seed}"
+            monkey_gif = "/assets/winning_monkey.gif"
+        elif generated < 0 and random_last > generated:
+            container = f"If you had invested {years} years ago, you would have lost {round(-generated):,} $ ... A MONKEY BEAT YOUU BY {round(random_last-generated):,}$ seed={current_seed}"
+            monkey_gif = "/assets/winning_monkey.gif"
+        elif generated > 0 and random_last < generated:
+            container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} $ ... YOU BEAT THE MONKEYYY BY {round(generated-random_last):,}$ seed={current_seed}"
+            monkey_gif = "/assets/pretentious_monkey.gif"
+        elif generated < 0 and random_last < generated:
+            container = f"If you had invested {years} years ago, you would have lost {round(-generated):,} $ ... YOU BEAT THE MONKEYYY BY {round(generated-random_last):,}$ seed={current_seed}"
+            monkey_gif = "/assets/pretentious_monkey.gif"
         fig = go.Figure([
             go.Scatter(x=portfolio_dates, y=portfolio_values, mode='lines', name='Portfolio Value'),
             go.Scatter(x=portfolio_dates, y=total_invested, mode='lines', name='Total Invested'),
@@ -411,12 +421,13 @@ def update_preset_and_reset(p1, p2, p3, reset):
             default_style_input, default_style_input, default_style_input, 
             default_style_input, default_style_input                           # Input field styles
         )
+
     # If Preset 1 is clicked and active (odd clicks)
     elif trigger == 'preset-1' and p1 % 2 == 1:
         return (
             active_style_1, default_preset_style, default_preset_style,  # Preset button styles
             0, 0, 0,                                                    # Preset n_clicks
-            '0.98buythedip', '^GSPC', 1000, 250, 10,                            # Input values for Preset 1
+            'growing', '^GSPC', 1000, 200, 3,                       # Input values for Preset 1
             {**default_style_input, 'background-color': 'lightblue'},
             {**default_style_input, 'background-color': 'lightblue'},
             {**default_style_input, 'background-color': 'lightblue'},
@@ -427,7 +438,7 @@ def update_preset_and_reset(p1, p2, p3, reset):
         return (
             default_preset_style, active_style_2, default_preset_style,
             0, 0, 0,
-            'losing', '^IXIC', 5000, 300, 5,
+            'losing', '^IXIC', 5000, 300, 10,
             {**default_style_input, 'background-color': 'lightgreen'},
             {**default_style_input, 'background-color': 'lightgreen'},
             {**default_style_input, 'background-color': 'lightgreen'},

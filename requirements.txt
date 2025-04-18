@@ -8,3 +8,4 @@ matplotlib
 dash-bootstrap-components==1.4.1
 tqdm
 seaborn
+openpyxl

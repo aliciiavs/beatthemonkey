@@ -7,7 +7,7 @@ def create_connection():
     try:
         # Establish connection to SQL Server
         connection = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'+
-                                     'Server=LAPTOP-K7M6RL21;'+
+                                     'Server=(localdb)\MSSQLLocalDB;'+
                                      'Database=finance;'+
                                      'Trusted_Connection=Yes')
         connection.autocommit = True
@@ -34,7 +34,7 @@ def generate_preset_results():
         return
 
     # Step 2: Fetch preset configurations from the database
-    cursor.execute("SELECT Preset_ID, Start_Year, Stock, Initial_Investment, Monthly_Investment, Strategy FROM Presets")
+    cursor.execute("SELECT Preset_ID, Start_Year, Stock, Initial_Investment, Monthly_Investment, Strategy, Current_Seed FROM Presets")
     presets = cursor.fetchall()
 
     # Step 3: Recalculate investment results for each preset configuration
@@ -42,14 +42,14 @@ def generate_preset_results():
     today = datetime.now().date()
 
     for preset in presets:
-        preset_id, start_year, stock, initial, monthly, strategy = preset
+        preset_id, start_year, stock, initial, monthly, strategy, current_seed = preset
 
         # Calculate start date based on the number of years
         start_date = datetime(today.year - start_year, today.month, today.day)  # Example start date
         end_date = today
 
         # Use your existing simulate_investment function
-        dates, portfolio_value, total_invested, random_portfolio_value  = simulate_investment(stock, initial, monthly, strategy, start_year)
+        dates, portfolio_value, total_invested, random_portfolio_value  = simulate_investment(stock, initial, monthly, strategy, start_year, current_seed)
 
         # Print the results to ensure they are being returned correctly
         print(f"Results for {stock} with strategy {strategy}: {dates}, {portfolio_value}, {total_invested}, {random_portfolio_value}")
@@ -105,6 +105,7 @@ def fetch_preset_table(preset_id):
         portfolio_value = [row[1] for row in rows]  # Assuming Total_Earned is your portfolio value
         total_invested = [row[2] for row in rows]
         random_portfolio_values = [row[3] for row in rows]
+        print("Data was fetched correctly from SQL")
         
         return dates, portfolio_value, total_invested, random_portfolio_values
 

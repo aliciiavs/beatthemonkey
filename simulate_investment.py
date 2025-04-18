@@ -7,10 +7,22 @@ def simulate_investment(stock, initial_amount, monthly_investment, strategy, yea
     yesterday = pd.Timestamp.today().normalize() - pd.DateOffset(days=1)
     earliest = yesterday - pd.DateOffset(years=years)
     
-    # Fetch data from Yahoo Finance
-    data = yf.download(stock, start=earliest, end=yesterday)['Close']
-    data.index = pd.to_datetime(data.index)
+    # Fixing exchange issue (give stock in EUR)
+    exchange_rate_ticker = "EURUSD=X"
+    exchange_rate_data = yf.download(exchange_rate_ticker, start=earliest, end=yesterday)['Close']
     
+    # Fetch data from Yahoo Finance
+    stock_data = yf.download(stock, start=earliest, end=yesterday)['Close']
+    stock_data.index = pd.to_datetime(stock_data.index)
+
+    data = pd.merge(stock_data, exchange_rate_data, left_index=True, right_index=True)
+    data.columns = ['Stock_Price_USD', 'EUR_USD']
+    
+    # Convert stock prices to euros
+    data['Stock_Price_EUR'] = (data['Stock_Price_USD'] / data['EUR_USD']).astype(float)
+    data = data.drop(columns=['Stock_Price_USD', 'EUR_USD'])
+    #data = stock_data
+
     # Debugging step: Print data info
     print(f"Downloaded data for {stock} from {earliest.date()} to {yesterday.date()}:")
     print(data.head())
@@ -30,7 +42,6 @@ def simulate_investment(stock, initial_amount, monthly_investment, strategy, yea
     portfolio_values['Portfolio Value'] = 0.0  # Initialize Portfolio Value column
     portfolio_values['Total Invested'] = 0.0  # Initialize Total Invested column
     portfolio_values['Random Value'] = 0.0  # Initialize Total Invested column
-
     shares = initial_amount / first_price  # Initial shares bought
     total_investment = initial_amount
 

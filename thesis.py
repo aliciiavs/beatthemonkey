@@ -12,11 +12,10 @@ initial_amount = 201
 monthly_investment = 200
 years=10
 preset_id=1
+current_seed = 1
 
-portfolio_dates, portfolio_values, total_invested = simulate_investment.simulate_investment(
-                stock, initial_amount, monthly_investment, strategy, years
+portfolio_dates, portfolio_values, total_invested, random_portfolio_values = simulate_investment.simulate_investment(
+                stock, initial_amount, monthly_investment, strategy, years, current_seed
             )
 
-inflated_total = inflation.calculate_value(portfolio_dates, total_invested)
-
-print(inflated_total)
+print(random_portfolio_values)

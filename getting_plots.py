@@ -360,8 +360,3 @@ def plot_avg_earnings_per_scenario_excluding():
 
     # Show it
     plt.show()
-
-get_scenario_avg_heatmap()
-get_scenario_avg_heatmap_excluding()
-plot_avg_earnings_per_scenario_excluding()
-plot_mean_final_value_per_strategy()
