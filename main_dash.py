@@ -46,11 +46,9 @@ app.layout = html.Div([
                 ),
                 dcc.Dropdown(
                     options=[
-                        {'label': 'Losing Strategy', 'value': 'losing'},
+                        {'label': 'Losing Streak', 'value': 'losing'},
                         {'label': 'Momentum Snap-In', 'value': 'growing'},
-                        {'label': '% Drop Buy-The-Dip', 'value': '0.98buythedip'},
                         {'label': 'Hybrid Buy-The-Dip', 'value': 'complexbuythedip'},
-                        {'label': 'Complex 5% Buy-The-Dip', 'value': 'complexbuythedip'},
                         {'label': 'Dollar-Cost Averaging', 'value': 'first'}
                     ],
                     value='losing',
@@ -201,13 +199,13 @@ app.layout = html.Div([
 )
 def update_popover_text(profile):
     if profile == 'losing':
-        return "This strategy invests when a price is consistently falling."
-    elif profile == '0.98buythedip':
-        return "This strategy invests when the price drops significantly (buying the dip)."
+        return "Buys on the very first trading day of each month."
+    elif profile == 'growing':
+        return "The flip side of “losing”: you scan each month for the first three-day price gain and put your money in then. If the stock doesn’t rise three days in a row, you invest on that month’s final trading day. You’re aiming to ride early up-trends."
     elif profile == 'complexbuythedip':
-        return "This strategy invests when the price drops significantly (buying the dip)."
+        return "Each month you immediately invest 30% of your allowance on day 1 (the “baseline”), then hold the other 70% aside. As the month goes on, if today’s price is 5% below the highest of the past three days, you spend that 70% all at once. If you never see a big dip, you simply put the rest in on the last trading day. You get a little safety net plus a focused “buy-the-dip” kick."
     elif profile == 'first':
-        return "This strategy invests on the first trading day of each month."
+        return "Every month, you invest your fixed amount on the very first day the market is open. It’s the simplest form of “dollar-cost averaging”—you always buy at the start of each month, no matter where the price is."
     return "Select a strategy to learn more."
 
 # Update the random seed
@@ -273,22 +271,22 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years, current_seed
         random_last = random_portfolio_values[-1] - total_invested[-1]
         monkey_gif = ""
         if generated > 0 and random_last > generated:
-            container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} $ !!! A MONKEY BEAT YOUU BY {round(random_last-generated):,}$ seed={current_seed}"
+            container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} € !!! A MONKEY BEAT YOU BY {round(random_last-generated):,}€"
             monkey_gif = "/assets/winning_monkey.gif"
         elif generated < 0 and random_last > generated:
-            container = f"If you had invested {years} years ago, you would have lost {round(-generated):,} $ ... A MONKEY BEAT YOUU BY {round(random_last-generated):,}$ seed={current_seed}"
+            container = f"If you had invested {years} years ago, you would have lost {round(-generated):,} € ... A MONKEY BEAT YOU BY {round(random_last-generated):,}€"
             monkey_gif = "/assets/winning_monkey.gif"
         elif generated > 0 and random_last < generated:
-            container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} $ ... YOU BEAT THE MONKEYYY BY {round(generated-random_last):,}$ seed={current_seed}"
+            container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} € ... YOU BEAT THE MONKEY BY {round(generated-random_last):,}€"
             monkey_gif = "/assets/pretentious_monkey.gif"
         elif generated < 0 and random_last < generated:
-            container = f"If you had invested {years} years ago, you would have lost {round(-generated):,} $ ... YOU BEAT THE MONKEYYY BY {round(generated-random_last):,}$ seed={current_seed}"
+            container = f"If you had invested {years} years ago, you would have lost {round(-generated):,} € ... YOU BEAT THE MONKEY BY {round(generated-random_last):,}€"
             monkey_gif = "/assets/pretentious_monkey.gif"
         fig = go.Figure([
-            go.Scatter(x=portfolio_dates, y=portfolio_values, mode='lines', name='Portfolio Value'),
-            go.Scatter(x=portfolio_dates, y=total_invested, mode='lines', name='Total Invested'),
-            go.Scatter(x=portfolio_dates, y=adjusted_values, mode='lines', name='Adjusted Total Investment'),
-            go.Scatter(x=portfolio_dates, y=random_portfolio_values, mode='lines', name='Random Portfolio Value'),  
+            go.Scatter(x=portfolio_dates, y=portfolio_values, mode='lines', name='Portfolio Value', line=dict(color='blue')),
+            go.Scatter(x=portfolio_dates, y=total_invested, mode='lines', name='Total Invested', line=dict(color='red')),
+            go.Scatter(x=portfolio_dates, y=adjusted_values, mode='lines', name='Adjusted Total Investment', line=dict(color='orange')),
+            go.Scatter(x=portfolio_dates, y=random_portfolio_values, mode='lines', name='Random Portfolio Value', line=dict(color='green')),  
         ])
         return container, fig, monkey_gif, {
     "display": "block",
