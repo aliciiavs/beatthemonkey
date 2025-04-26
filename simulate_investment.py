@@ -131,22 +131,6 @@ def simulate_investment(stock, initial_amount, monthly_investment, strategy, yea
             portfolio_values.at[date, 'Total Invested'] = total_investment
 
     elif strategy == "0.98buythedip":
-        """
-        To proceed with the simulation, a number of strategies needed to be defined. The requisites for the app were
-        that the simulated movements require low effort and little time, reinforcing the idea of low-intervention
-        investing strategies (buy-and-hold).
-
-        Buy-The-Dip is a very popular beginner's strategy, however, it requires some calculations that can be provided
-        by a phone application or notification. It has been well studied and it has proven to beat the market (our monkey)
-        several times (ADD SOME REFERENCES, one is chill). Its logic is, when the value of our selected asset drops by a
-        certain percentage, we buy. 
-
-        In order to fit the input idea, the strategy was adapted into an easier and more specified model.
-        
-        Hold a budget.
-        If the next day drop more than 20% then buy. Else, do not. Keep it in a count and then invest
-        when it is correct to do so. If the period ends and still leftover cash, invest all. 
-        """
         previous_month = data.index[0].month
         previous_year = data.index[0].year
         current_budget = 0
