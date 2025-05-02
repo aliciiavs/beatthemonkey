@@ -199,7 +199,7 @@ app.layout = html.Div([
 )
 def update_popover_text(profile):
     if profile == 'losing':
-        return "Buys on the very first trading day of each month."
+        return "Each month you look for the first time the stock has fallen four days in a row. On that day, you invest your monthly sum. If it never drops four days straight, you invest on the last trading day of the month. You’re trying to “buy” after a noticeable drop."
     elif profile == 'growing':
         return "The flip side of “losing”: you scan each month for the first three-day price gain and put your money in then. If the stock doesn’t rise three days in a row, you invest on that month’s final trading day. You’re aiming to ride early up-trends."
     elif profile == 'complexbuythedip':
@@ -281,6 +281,9 @@ def update_graph(n_clicks, profile, asset, initial, monthly, years, current_seed
             monkey_gif = "/assets/pretentious_monkey.gif"
         elif generated < 0 and random_last < generated:
             container = f"If you had invested {years} years ago, you would have lost {round(-generated):,} € ... YOU BEAT THE MONKEY BY {round(generated-random_last):,}€"
+            monkey_gif = "/assets/pretentious_monkey.gif"
+        elif generated == 0 and random_last == generated:
+            container = f"If you had invested {years} years ago, today you would have earned {round(generated):,} € ... YOU AND THE MONKEY ARE EVEN"
             monkey_gif = "/assets/pretentious_monkey.gif"
         fig = go.Figure([
             go.Scatter(x=portfolio_dates, y=portfolio_values, mode='lines', name='Portfolio Value', line=dict(color='blue')),
